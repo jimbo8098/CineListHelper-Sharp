@@ -4,17 +4,16 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using CineListHelper.Models;
 
 namespace CineListHelper.Factory
 {
     public class ListingFactory
     {
-        public Listing Convert(Movie movie, int offset)
+        public IEnumerable<Listing> Convert(Movie movie, int offset)
         {
-            var listing = new Listing();
-            listing.title = movie.title;
-            var times = new List<DateTime>();
-            foreach(var t in movie.times)
+            var listings = new List<Listing>();
+            foreach (var t in movie.times)
             {
                 var hours = Int32.Parse(t.Split(':')[0]);
                 var minutes = Int32.Parse(t.Split(':')[1]);
@@ -22,10 +21,13 @@ namespace CineListHelper.Factory
                 time.AddDays(offset);
                 time.AddHours(hours);
                 time.AddMinutes(minutes);
-                times.Add(time);
+                listings.Add(new Listing()
+                {
+                    time = time,
+                    title = movie.title
+                });
             }
-            listing.times = times;
-            return listing;
+            return listings;
         }
     }
 }

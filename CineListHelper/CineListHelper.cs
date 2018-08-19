@@ -1,4 +1,6 @@
-﻿using CineListHelper.Models.Responses;
+﻿using CineListHelper.Factory;
+using CineListHelper.Models;
+using CineListHelper.Models.Responses;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;

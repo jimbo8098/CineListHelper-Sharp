@@ -7,7 +7,7 @@ namespace CineListHelper.Models.Internal
 {
     public class Listing
     {
-        public IEnumerable<DateTime> times;
+        public DateTime time;
         public string title;
     }
 }

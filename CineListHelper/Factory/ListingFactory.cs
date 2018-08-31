@@ -12,22 +12,34 @@ namespace CineListHelper.Factory
     {
         public IEnumerable<Listing> Convert(Movie movie, int offset)
         {
-            var listings = new List<Listing>();
-            foreach (var t in movie.times)
+            if (movie != null)
             {
-                var hours = Int32.Parse(t.Split(':')[0]);
-                var minutes = Int32.Parse(t.Split(':')[1]);
-                DateTime time = DateTime.Now;
-                time.AddDays(offset);
-                time.AddHours(hours);
-                time.AddMinutes(minutes);
-                listings.Add(new Listing()
+                var listings = new List<Listing>();
+                foreach (var t in movie.times)
                 {
-                    time = time,
-                    title = movie.title
-                });
+                    var hours = Int32.Parse(t.Split(':')[0]);
+                    var minutes = Int32.Parse(t.Split(':')[1]);
+                    DateTime time = DateTime.Today
+                        .AddDays(offset)
+                        .AddHours(hours)
+                        .AddMinutes(minutes);
+                    listings.Add(new Listing()
+                    {
+                        time = time,
+                        title = movie.title
+                    });
+                }
+                return listings;
             }
-            return listings;
+            else
+            {
+                return null;
+            }
+        }
+
+        public IEnumerable<Listing> Convert (IEnumerable<Movie> movies, int offset)
+        {
+            return movies.SelectMany(m => Convert(m, offset));
         }
     }
 }

@@ -17,7 +17,8 @@ namespace CineListHelper.Factory
             {
                 Start = new CalDateTime(listing.time),
                 End = new CalDateTime(listing.time.AddHours(1)),
-                Name = cinema.name + ": " + listing.title,
+                //Name = cinema.name + ": " + listing.title,
+                Name = listing.title,
                 Description = cinema.name + ": " + listing.title,
                 Location = cinema.name
             };

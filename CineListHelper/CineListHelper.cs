@@ -18,7 +18,16 @@ namespace CineListHelper
         public event EventHandler<string> OnInformationalMessage;
         public CineListHelper(){}
 
-        public async Task<IEnumerable<Cinema>> GetLocalCinemas(string postcode)
+        public async Task<IEnumerable<Cinema>> GetCinemasByLocation(string location)
+        {
+            using (var client = new HttpClient())
+            {
+                var response = JsonConvert.DeserializeObject<CinemaResponse>(await client.GetStringAsync("http://api.cinelist.co.uk/search/cinemas/location/" + location));
+                return response.cinemas;
+            }
+        }
+
+        public async Task<IEnumerable<Cinema>> GetCinemasByPostcode(string postcode)
         {
             using (var client = new HttpClient())
             {
@@ -27,7 +36,16 @@ namespace CineListHelper
             }
         }
 
-        public async Task<IEnumerable<Listing>> GetMovies(Cinema cinema, int dayRange)
+        public async Task<IEnumerable<Cinema>> GetCinemasByLatLong(double coord_lat,double coord_long)
+        {
+            using (var client = new HttpClient())
+            {
+                var response = JsonConvert.DeserializeObject<CinemaResponse>(await client.GetStringAsync("http://api.cinelist.co.uk/search/cinemas/coordinates/" + coord_lat + "/" + coord_long));
+                return response.cinemas;
+            }
+        }
+
+        public async Task<IEnumerable<Listing>> GetMoviesByCinema(Cinema cinema, int dayRange)
         {
             var lFactory = new ListingFactory();
             var movies = new List<Listing>();
@@ -57,6 +75,16 @@ namespace CineListHelper
             return movies;
         }
 
+        public async Task<Dictionary<Cinema,IEnumerable<Listing>>> GetMoviesByCinemas(IEnumerable<Cinema> cinemas, int dayRange)
+        {
+            var moviesByCinema = new Dictionary<Cinema, IEnumerable<Listing>>();
+            foreach(var c in cinemas)
+            {
+                moviesByCinema.Add(c, await GetMoviesByCinema(c, dayRange));
+            }
+            return moviesByCinema;
+        }
+
         public void HandleTrivialError(string Message)
         {
             OnTrivialError?.Invoke(this, Message);
@@ -68,22 +96,10 @@ namespace CineListHelper
         }
 
 
-        public async Task<Dictionary<Cinema, IEnumerable<Listing>>> GetLocalMovies(string postcode, int dayRange)
+        public async Task<Dictionary<Cinema, IEnumerable<Listing>>> GetLocalMoviesByPostcode(string postcode, int dayRange)
         {
             var movies = new Dictionary<Cinema,IEnumerable<Listing>>();
-            foreach(var cinema in await GetLocalCinemas(postcode))
-            {
-                try
-                {
-                    movies.Add(cinema, await GetMovies(cinema, dayRange));
-                }
-                catch(Exception e)
-                {
-                    OnTrivialError?.Invoke(this,e.Message);
-                }
-                Thread.Sleep(500);
-            }
-            return movies;
+            return await GetMoviesByCinemas(await GetCinemasByPostcode(postcode), dayRange);
         }
     }
 }
